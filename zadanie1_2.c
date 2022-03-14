@@ -55,6 +55,28 @@ void usun(list * w) {
     }
 }
 
+// Zadanie 7
+void usun_podzielne(list * l, int k){
+    list pierwszy = (*l);
+    while ((*l)->next != NULL) {
+        if((*l)->next->info % k == 0) {
+            list nast = (*l)->next->next;
+            usun(&(*l)->next);
+            (*l)->next = nast;
+        }
+        else
+            *l = (*l)->next;
+    }
+    *l = pierwszy;
+}
+
+//Zadanie 8
+void usun_wszystkie(list * l) {
+    while(*l != NULL) {
+        usun(l);
+    }
+}
+
 /* Wypisanie listy 1-kierunkowej
  */
 void druk(list u) {
@@ -65,46 +87,113 @@ void druk(list u) {
     printf("\n");
 }
 
+
+//Zadanie3
+void dodaj_liczbe(list h, int a) {
+    while(h != NULL) {
+        h->info += a;
+        h = h->next;
+    }
+
+}
+
+//Zadanie 4
+void odwroc_rek(list * l) {
+    if(*l != NULL && (*l)->next != NULL) {
+        list reszta = (*l)->next;
+        odwroc_rek(&reszta);
+        (*l)->next->next = *l;
+        (*l)->next = NULL;
+        *l = reszta;
+    }
+}
+
+void odwroc_it(list * l) {
+    if(*l != NULL) {
+        list odwr = NULL;
+        list nast;
+        while((*l)->next != NULL) {
+            nast = (*l)->next;
+            (*l)->next = odwr;
+            odwr = (*l);
+            (*l) = nast;
+        }
+        (*l)->next = odwr;
+    }
+
+}
+
+//Zadanie 5
+int podzielne(list l, int k) {
+    int licznik = 0;
+    while(l != NULL) {
+        if (l->info % k == 0) {
+            ++licznik;
+        }
+        l = l->next;
+    }
+    return licznik;
+}
+
+//Zadanie 6
+bool niemalejąca(list l) {
+    while (l->next != NULL) {
+        if (l->next->info < l->info)
+            return false;
+        l = l->next;
+    }
+    return true;
+}
+
+
+
 // IMPLEMENTACJA KOLEJKI OPARTEJ NA LIŚCIE 1-KIERUNKOWEJ
 
-/* Alias reprezentujący wskaźnik na wierzchołek stosu
+/* Alias reprezentujący wskaźnik na początek
  */
 typedef list kolejka;
 
 /* Sprawdza czy stos K jest pusty
  */
-bool empty(kolejka K) {
-    return K == NULL;
+bool empty(kolejka Q) {
+    return Q == NULL;
 }
 
-/* Wstawia liczbę x na koniec kolejki S
+/* Wstawia liczbę x na koniec kolejki Q
  */
-void push_back(kolejka K, info_t x) {
-    while (K->next != NULL) {
-        K = K->next;
+void push_back(kolejka * Q, info_t x) {
+    if (empty(*Q)) {
+        dodaj(Q, nowy(x));
     }
-    K->next = nowy(x);
+    else {
+        element* q = *Q;
+        while (q->next != NULL) {
+            q = q->next;
+        }
+        dodaj(&(q->next), nowy(x));
+
+    }
 }
 
 /* Zdejmuje element z początku kolejki S i daje jego wartość w wyniku.
  * Zwraca 0, gdy stos jest pusty.
  */
-info_t pop_front(kolejka * K) {
+info_t pop_front(kolejka * Q) {
     info_t wynik = 0;
-    if (!empty(*K)) {
-        wynik = (*K)->info;
-        usun(K);
+    if (!empty(*Q)) {
+        wynik = (*Q)->info;
+        usun(Q);
     }
     return wynik;
 }
 
 /* Daje liczbę elementów umieszczonych na stosie
  */
-int size(kolejka K) {
+int size(kolejka Q) {
     int licznik = 0;
-    while (K != NULL) {
+    while (Q != NULL) {
         ++licznik;
-        K = K->next;
+        Q = Q->next;
     }
     return licznik;
 }
@@ -114,11 +203,39 @@ int size(kolejka K) {
 int main() {
     kolejka K;
     ini(&K);
-    push_back(K, 5);
-    push_back(K, -30);
-    push_back(K, 129);
-    push_back(K, -420);
+    push_back(&K, 5);
+    push_back(&K, 30);
+    push_back(&K, 30);
+    push_back(&K, 129);
+    push_back(&K, 420);
+    if(niemalejąca(K))
+        printf("jest niemalejaca\n");
+    else
+        printf("nie jest niemalejaca\n");
+
     druk(K);
+
+    dodaj_liczbe(K, 5);
+    druk(K);
+
+    odwroc_rek(&K);
+    druk(K);
+
+    odwroc_it(&K);
+    druk(K);
+
+    //test zadanie 7
+    usun_podzielne(&K,35);
+    druk(K);
+
+
+    // test zadanie 8
+    usun_wszystkie(&K);
+    printf("----\n");
+    druk(K);
+    printf("----\n");
+
+    printf("%d \n\n ", podzielne(K, 5));
 
     while (!empty(K)) {
         printf("%d | ", pop_front(&K));
@@ -126,10 +243,10 @@ int main() {
     }
     printf("\n");
 
-    for (int k = 0; k < 10000000; ++k)
-        push_back(K, k);
+    for (int k = 0; k < 1000; ++k)
+        push_back(&K, k);
     printf("|K| = %d\n\n", size(K));
-    for (int k = 0; k < 10000000; ++k)
+    for (int k = 0; k < 1000; ++k)
         pop_front(&K);
     printf("|K| = %d\n\n", size(K));
 
